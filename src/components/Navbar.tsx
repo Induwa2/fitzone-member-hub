@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -17,6 +18,14 @@ const navLinks = [
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 gradient-navy border-b border-primary/10">
@@ -26,16 +35,13 @@ const Navbar = () => {
           <span className="font-heading text-xl font-bold">FitZone</span>
         </Link>
 
-        {/* Desktop */}
         <div className="hidden lg:flex items-center gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                location.pathname === link.to
-                  ? "text-accent"
-                  : "text-navy-foreground/80 hover:text-accent"
+                location.pathname === link.to ? "text-accent" : "text-navy-foreground/80 hover:text-accent"
               }`}
             >
               {link.label}
@@ -44,21 +50,32 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-3">
-          <Button variant="ghost" className="text-navy-foreground hover:text-accent" asChild>
-            <Link to="/contact">Login</Link>
-          </Button>
-          <Button className="gradient-accent text-accent-foreground font-semibold" asChild>
-            <Link to="/membership">Join Now</Link>
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <Button variant="ghost" className="text-navy-foreground hover:text-accent" asChild>
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+              <Button className="gradient-accent text-accent-foreground font-semibold" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" className="text-navy-foreground hover:text-accent" asChild>
+                <Link to="/login">Login</Link>
+              </Button>
+              <Button className="gradient-accent text-accent-foreground font-semibold" asChild>
+                <Link to="/membership">Join Now</Link>
+              </Button>
+            </>
+          )}
         </div>
 
-        {/* Mobile toggle */}
         <button className="lg:hidden text-navy-foreground" onClick={() => setOpen(!open)}>
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       {open && (
         <div className="lg:hidden gradient-navy border-t border-primary/10 pb-4">
           {navLinks.map((link) => (
@@ -73,10 +90,26 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <div className="px-6 pt-2">
-            <Button className="w-full gradient-accent text-accent-foreground font-semibold" asChild>
-              <Link to="/membership" onClick={() => setOpen(false)}>Join Now</Link>
-            </Button>
+          <div className="px-6 pt-2 space-y-2">
+            {isAuthenticated ? (
+              <>
+                <Button className="w-full" variant="outline" asChild>
+                  <Link to="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
+                </Button>
+                <Button className="w-full gradient-accent text-accent-foreground font-semibold" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button className="w-full" variant="outline" asChild>
+                  <Link to="/login" onClick={() => setOpen(false)}>Login</Link>
+                </Button>
+                <Button className="w-full gradient-accent text-accent-foreground font-semibold" asChild>
+                  <Link to="/membership" onClick={() => setOpen(false)}>Join Now</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
