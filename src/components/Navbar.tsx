@@ -61,7 +61,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Button variant="ghost" className="text-navy-foreground hover:text-accent" asChild>
+              <Button variant="ghost" className="text-navy-foreground hover:text-white" asChild>
                 <Link to="/login">Login</Link>
               </Button>
               <Button className="gradient-accent text-accent-foreground font-semibold" asChild>
