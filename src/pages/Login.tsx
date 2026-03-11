@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dumbbell, Eye, EyeOff } from "lucide-react";
+import { Dumbbell, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,12 +11,15 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = login(email, password);
+    setIsLoading(true);
+    const result = await login(email, password);
+    setIsLoading(false);
     if (result.success) {
       toast.success("Login successful!");
       navigate("/dashboard");
@@ -52,22 +55,16 @@ const Login = () => {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full gradient-accent text-accent-foreground font-semibold h-11">Sign In</Button>
+            <Button type="submit" className="w-full gradient-accent text-accent-foreground font-semibold h-11" disabled={isLoading}>
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Sign In
+            </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Don't have an account?{" "}
             <Link to="/register" className="text-primary font-medium hover:underline">Register</Link>
           </p>
-        </div>
-
-        <div className="mt-6 bg-card/50 rounded-xl p-5 border border-border">
-          <p className="text-xs font-semibold text-card-foreground mb-3">Demo Accounts:</p>
-          <div className="space-y-2 text-xs text-muted-foreground">
-            <p><span className="text-accent font-medium">Admin:</span> admin@fitzone.com / admin123</p>
-            <p><span className="text-primary font-medium">Staff:</span> staff@fitzone.com / staff123</p>
-            <p><span className="text-card-foreground font-medium">Customer:</span> customer@fitzone.com / customer123</p>
-          </div>
         </div>
       </div>
     </div>

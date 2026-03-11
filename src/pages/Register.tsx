@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,10 +12,11 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirm) {
       toast.error("Passwords do not match");
@@ -25,7 +26,9 @@ const Register = () => {
       toast.error("Password must be at least 6 characters");
       return;
     }
-    const result = register(name, email, password);
+    setIsLoading(true);
+    const result = await register(name, email, password);
+    setIsLoading(false);
     if (result.success) {
       toast.success("Account created successfully!");
       navigate("/dashboard");
@@ -64,7 +67,10 @@ const Register = () => {
               <Label htmlFor="confirm" className="text-card-foreground">Confirm Password</Label>
               <Input id="confirm" type="password" placeholder="••••••••" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
             </div>
-            <Button type="submit" className="w-full gradient-accent text-accent-foreground font-semibold h-11">Create Account</Button>
+            <Button type="submit" className="w-full gradient-accent text-accent-foreground font-semibold h-11" disabled={isLoading}>
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Create Account
+            </Button>
           </form>
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{" "}
