@@ -84,12 +84,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { name }, emailRedirectTo: window.location.origin },
     });
     if (error) return { success: false, error: error.message };
+
+    // Create profile and role if the trigger didn't fire
+    if (data.user) {
+      const userId = data.user.id;
+      // Check if profile exists, create if not
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!existingProfile) {
+        await supabase.from("profiles").insert({ user_id: userId, name, email });
+      }
+      // Check if role exists, create if not
+      const { data: existingRole } = await supabase
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!existingRole) {
+        await supabase.from("user_roles").insert({ user_id: userId, role: "customer" });
+      }
+    }
+
     return { success: true };
   };
 
